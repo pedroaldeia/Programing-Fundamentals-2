@@ -35,7 +35,12 @@ def intersecao_para_str(inter):
     return str(obtem_col(inter)) + str(obtem_lin(inter))
 
 def str_para_intersecao(string):
-    return cria_intersecao(str(string[0]), int(string[1]))
+    if len(string) == 2:
+        return cria_intersecao(str(string[0]), int(string[1]))
+    if len(string) == 3:
+        return cria_intersecao(str(string[0]), int(string[1:]))
+
+print(str_para_intersecao(""))
 
 def obtem_intersecoes_adjacentes(inter, canto):
     intersecoes = ()
@@ -130,17 +135,17 @@ def cria_goban_vazio(n):
 
 def cria_goban(n, B, P):
     if not (type(B) == tuple and type(P) == tuple):
-        raise ValueError("cria_goban_vazio: argumentos invalidos")
+        raise ValueError("cria_goban: argumentos invalidos")
     for inter in B:
-        if not (len(inter.keys()) == 2 and "col" in inter.keys()  and "lin" in inter.keys() \
+        if not (type(inter) == dict and len(inter.keys()) == 2 and "col" in inter.keys()  and "lin" in inter.keys() \
                 and type(inter["col"]) == str and len(inter["col"]) == 1 and type(inter["lin"]) == int\
                 and chr(65) <= inter["col"] <= chr(64+n) and 0 < inter["lin"] <= n):
-            raise ValueError("cria_goban_vazio: argumentos invalidos")
+            raise ValueError("cria_goban: argumentos invalidos")
     for inter in P:
-        if not (len(inter.keys()) == 2 and "col" in inter.keys() and "lin" in inter.keys() \
+        if not (type(inter) == dict and len(inter.keys()) == 2 and "col" in inter.keys() and "lin" in inter.keys() \
                 and type(inter["col"]) == str and len(inter["col"]) == 1 and type(inter["lin"]) == int\
                 and chr(65) <= inter["col"] <= chr(64+n) and 0 < inter["lin"] <= n):
-            raise ValueError("cria_goban_vazio: argumentos invalidos")
+            raise ValueError("cria_goban: argumentos invalidos")
 
     goban_vazio = cria_goban_vazio(n)
     goban_vazio.update({"B": B, "P": P})
@@ -148,11 +153,11 @@ def cria_goban(n, B, P):
 
 def cria_copia_goban(gob):
     copia = {}
-    if type(gob)== dict:
+    if isinstance(gob, dict):
         for key, objeto in gob.items():
             copia[key] = cria_copia_goban(objeto)
-    elif type(gob)== tuple:
-        return tuple(cria_copia_goban(objeto) for objeto in tuple)
+    elif isinstance(gob, tuple):
+        return tuple(cria_copia_goban(objeto) for objeto in gob)
     else:
         return gob
     return copia
@@ -211,10 +216,10 @@ def remove_cadeia(gob, cadeia): #nao sei se funciona
     for inter in cadeia:
         if inter in gob["B"]:
             novo_gob_B = tuple(i for i in gob["B"] if i != inter)
-            gob["B"].update(novo_gob_B)
+            gob.update({"B": novo_gob_B})
         if inter in gob["P"]:
             novo_gob_P = tuple(i for i in gob["P"] if i != inter)
-            gob["P"].update(novo_gob_P)
+            gob.update({"P": novo_gob_P})
     return gob
 
 def eh_goban(gob):
@@ -318,17 +323,16 @@ def obtem_adjacentes_diferentes(gob, tup):
     return tuple(ordena_intersecoes(interes))
 
 def jogada(gob, inter, p):
-    coloca_pedra(gob, inter, p)
+    if not inter in gob["P"] and not inter in gob["B"]:
+        coloca_pedra(gob, inter, p)
     if p == "B":
         for adj in obtem_intersecoes_adjacentes(inter, obtem_ultima_intersecao(gob)):
             if adj in gob["P"] and obtem_adjacentes_diferentes(gob, obtem_cadeia(gob, adj)) == ():
-                for i in obtem_cadeia(gob, adj):
-                    remove_pedra(gob, i) 
+                remove_cadeia(gob, obtem_cadeia(gob, adj))
     if p == "P":
         for adj in obtem_intersecoes_adjacentes(inter, obtem_ultima_intersecao(gob)):
             if adj in gob["B"] and obtem_adjacentes_diferentes(gob, obtem_cadeia(gob, adj)) == ():
-                for i in obtem_cadeia(gob, adj):
-                    remove_pedra(gob, i)
+                remove_cadeia(gob, obtem_cadeia(gob, adj))
     return gob
 
 def obtem_pedras_jogadores(gob):
@@ -339,6 +343,8 @@ def obtem_pedras_jogadores(gob):
 def calcula_pontos(gob):  #2.2.1
     count_b = len(gob["B"])
     count_p = len(gob["P"])
+    if count_b == 0 and count_p == 0:
+        return (count_b, count_p)
     for interes in obtem_territorios(gob):
         if not interes[0] in gob["B"] and not interes[0] in gob["P"]:
             if all(inter in gob["B"] for inter in obtem_adjacentes_diferentes(gob, interes)):
@@ -348,17 +354,99 @@ def calcula_pontos(gob):  #2.2.1
     return (count_b, count_p)
 
 def eh_jogada_legal(gob, inter, p, copgob):
-    if eh_goban(gob) and eh_intersecao_valida(gob, inter) and not inter in gob[p]:
-        if obtem_adjacentes_diferentes(coloca_pedra(gob, inter, p), obtem_cadeia(gob, inter)) == ():
+    g_copia = cria_copia_goban(gob)
+    if eh_goban(gob) and eh_intersecao_valida(gob, inter) and not inter in gob["P"] and not inter in gob["B"]:
+        if obtem_adjacentes_diferentes(jogada(g_copia, inter, p), obtem_cadeia(jogada(g_copia, inter, p), inter)) == ():
             return False
-        if jogada(gob, inter, p) != copgob:
+        if jogada(g_copia, inter, p) != copgob:
             return True
     return False
 
+'''def turno_jogador(gob, p, copgob):
+    a = True
+    arg = ""
+    while arg == "":
+        arg = str(input("Escreva uma intersecao ou 'P' para passar [X]:"))
+        while a:
+            arg = str(input("Escreva uma intersecao ou 'P' para passar [X]:"))
+
+        if not eh_jogada_legal(gob, str_para_intersecao(arg), p, copgob):
+            a = False
+        elif arg == "P":
+            return False'''
+        
 def turno_jogador(gob, p, copgob):
-    arg = input("Escreva uma intersecao ou 'P' para passar [X]:")
-    if arg == "P":
-        return gob
-    if not eh_jogada_legal(gob, str_para_intersecao(arg), p, copgob):
-        turno_jogador(gob, p, copgob)
-    return coloca_pedra(gob, str_para_intersecao(arg), p)
+    arg = ""
+    while arg == "":
+        if eh_pedra_branca(p):
+            arg = str(input("Escreva uma intersecao ou 'P' para passar [O]:"))
+        else:
+            arg = str(input("Escreva uma intersecao ou 'P' para passar [X]:"))
+    while not eh_jogada_legal(gob, str_para_intersecao(arg), p, copgob):
+        if arg == "P":
+            return False
+        if eh_pedra_branca(p):
+            arg = str(input("Escreva uma intersecao ou 'P' para passar [O]:"))
+        else:
+            arg = str(input("Escreva uma intersecao ou 'P' para passar [X]:"))
+    gob = jogada(gob, str_para_intersecao(arg), p)
+    return True
+
+def go(n, ib, ip):
+    passcount = 0
+    if not(isinstance(ib, tuple) and isinstance(ip, tuple) and isinstance(n, int) and n in (9, 13, 19)):
+        raise ValueError
+    if len(ib) > 0 and len(ip) > 0:
+        try:
+            (str_para_intersecao(i) for i in ib)
+            (str_para_intersecao(i) for i in ip)
+        except:
+            raise ValueError
+        ib = tuple(str_para_intersecao(i) for i in ib)
+        ip = tuple(str_para_intersecao(i) for i in ip)
+        gob = cria_goban(n, ib, ip)
+    else:
+        gob = cria_goban_vazio(n)
+    b = cria_pedra_preta()
+    while passcount < 2:
+        print ("Branco (O) tem", calcula_pontos(gob)[0], "pontos\nPreto (X) tem", calcula_pontos(gob)[1], "pontos") 
+        print(goban_para_str(gob))
+        a = turno_jogador(gob, b, cria_copia_goban(gob))
+        if not a:
+            passcount += 1
+        else:
+            passcount = 0
+        if passcount < 2:
+            b = cria_pedra_branca()
+            print ("Branco (O) tem", calcula_pontos(gob)[0], "pontos\nPreto (X) tem", calcula_pontos(gob)[1], "pontos") 
+            print(goban_para_str(gob))
+            a = turno_jogador(gob, b, cria_copia_goban(gob))
+            if not a:
+                passcount += 1
+            else:
+                passcount = 0
+            b = cria_pedra_preta()
+    print ("Branco (O) tem", calcula_pontos(gob)[0], "pontos\nPreto (X) tem", calcula_pontos(gob)[1], "pontos") 
+    print(goban_para_str(gob))
+    if calcula_pontos(gob)[0] > calcula_pontos(gob)[1]:
+        return True
+    return False
+
+
+'''
+def go(n, ib, ip):
+    if not(isinstance(ib, tuple) and isinstance(ip, tuple) and isinstance(n, int) and n in (9, 13, 19)):
+        raise ValueError
+    if len(ib) > 0 and len(ip) > 0:
+        try:
+            (str_para_intersecao(i) for i in ib)
+            (str_para_intersecao(i) for i in ip)
+        except:
+            raise ValueError
+        ib = tuple(str_para_intersecao(i) for i in ib)
+        ip = tuple(str_para_intersecao(i) for i in ip)
+        gob = cria_goban(n, ib, ip)
+    else:
+        gob = cria_goban_vazio(n)
+    return goban_para_str(gob)
+'''
