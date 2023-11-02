@@ -40,8 +40,6 @@ def str_para_intersecao(string):
     if len(string) == 3:
         return cria_intersecao(str(string[0]), int(string[1:]))
 
-print(str_para_intersecao(""))
-
 def obtem_intersecoes_adjacentes(inter, canto):
     intersecoes = ()
     if obtem_lin(inter) != 1:
@@ -361,19 +359,6 @@ def eh_jogada_legal(gob, inter, p, copgob):
         if jogada(g_copia, inter, p) != copgob:
             return True
     return False
-
-'''def turno_jogador(gob, p, copgob):
-    a = True
-    arg = ""
-    while arg == "":
-        arg = str(input("Escreva uma intersecao ou 'P' para passar [X]:"))
-        while a:
-            arg = str(input("Escreva uma intersecao ou 'P' para passar [X]:"))
-
-        if not eh_jogada_legal(gob, str_para_intersecao(arg), p, copgob):
-            a = False
-        elif arg == "P":
-            return False'''
         
 def turno_jogador(gob, p, copgob):
     arg = ""
@@ -395,15 +380,13 @@ def turno_jogador(gob, p, copgob):
 def go(n, ib, ip):
     passcount = 0
     if not(isinstance(ib, tuple) and isinstance(ip, tuple) and isinstance(n, int) and n in (9, 13, 19)):
-        raise ValueError
+        raise ValueError("go: argumentos invalidos")
     if len(ib) > 0 and len(ip) > 0:
         try:
             (str_para_intersecao(i) for i in ib)
             (str_para_intersecao(i) for i in ip)
-        except:
-            raise ValueError
-        ib = tuple(str_para_intersecao(i) for i in ib)
-        ip = tuple(str_para_intersecao(i) for i in ip)
+        except ValueError:
+            raise ValueError("go: argumentos invalidos")
         gob = cria_goban(n, ib, ip)
     else:
         gob = cria_goban_vazio(n)
@@ -431,22 +414,3 @@ def go(n, ib, ip):
     if calcula_pontos(gob)[0] > calcula_pontos(gob)[1]:
         return True
     return False
-
-
-'''
-def go(n, ib, ip):
-    if not(isinstance(ib, tuple) and isinstance(ip, tuple) and isinstance(n, int) and n in (9, 13, 19)):
-        raise ValueError
-    if len(ib) > 0 and len(ip) > 0:
-        try:
-            (str_para_intersecao(i) for i in ib)
-            (str_para_intersecao(i) for i in ip)
-        except:
-            raise ValueError
-        ib = tuple(str_para_intersecao(i) for i in ib)
-        ip = tuple(str_para_intersecao(i) for i in ip)
-        gob = cria_goban(n, ib, ip)
-    else:
-        gob = cria_goban_vazio(n)
-    return goban_para_str(gob)
-'''
