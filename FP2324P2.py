@@ -2,7 +2,7 @@
 # INTERSEÇÃO TAD - 2.1.1
 
 def cria_intersecao(col, lin):
-    if lin is None or len(str(lin)) == 0:
+    if lin is None or len(str(lin)) == 0 or col is None or len(str(col)) == 0:
         raise ValueError("cria_intersecao: argumentos invalidos")
     try:
         int(str(lin))
@@ -127,23 +127,23 @@ def eh_pedra_jogador(p):
 #TAD GOBAN
 
 def cria_goban_vazio(n):
-    if not (type(n) == int and n in (9, 13, 19)):
+    if n is None or not (type(n) == int and n in (9, 13, 19)):
         raise ValueError("cria_goban_vazio: argumento invalido")
     return {"n": n, "B": (), "P": ()}
 
 def cria_goban(n, B, P):
     if not (type(B) == tuple and type(P) == tuple):
-        raise ValueError("cria_goban: argumentos invalidos")
+        raise ValueError("cria_goban_vazio: argumento invalido")
     for inter in B:
-        if not (type(inter) == dict and len(inter.keys()) == 2 and "col" in inter.keys()  and "lin" in inter.keys() \
+        if inter is None or not (type(inter) == dict and len(inter.keys()) == 2 and "col" in inter.keys()  and "lin" in inter.keys() \
                 and type(inter["col"]) == str and len(inter["col"]) == 1 and type(inter["lin"]) == int\
                 and chr(65) <= inter["col"] <= chr(64+n) and 0 < inter["lin"] <= n):
-            raise ValueError("cria_goban: argumentos invalidos")
+            raise ValueError("cria_goban_vazio: argumento invalido")
     for inter in P:
-        if not (type(inter) == dict and len(inter.keys()) == 2 and "col" in inter.keys() and "lin" in inter.keys() \
+        if inter is None or not (type(inter) == dict and len(inter.keys()) == 2 and "col" in inter.keys() and "lin" in inter.keys() \
                 and type(inter["col"]) == str and len(inter["col"]) == 1 and type(inter["lin"]) == int\
                 and chr(65) <= inter["col"] <= chr(64+n) and 0 < inter["lin"] <= n):
-            raise ValueError("cria_goban: argumentos invalidos")
+            raise ValueError("cria_goban_vazio: argumento invalido")
 
     goban_vazio = cria_goban_vazio(n)
     goban_vazio.update({"B": B, "P": P})
@@ -383,8 +383,8 @@ def go(n, ib, ip):
         raise ValueError("go: argumentos invalidos")
     if len(ib) > 0 and len(ip) > 0:
         try:
-            (str_para_intersecao(i) for i in ib)
-            (str_para_intersecao(i) for i in ip)
+            ib = tuple(str_para_intersecao(i) for i in ib)
+            ip = tuple(str_para_intersecao(i) for i in ip)
         except ValueError:
             raise ValueError("go: argumentos invalidos")
         gob = cria_goban(n, ib, ip)
@@ -414,3 +414,4 @@ def go(n, ib, ip):
     if calcula_pontos(gob)[0] > calcula_pontos(gob)[1]:
         return True
     return False
+
