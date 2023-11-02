@@ -135,14 +135,14 @@ def cria_goban(n, B, P):
         raise ValueError("cria_goban_vazio: argumento invalido")
     geral = []
     for inter in B:
-        if inter is None or not (eh_intersecao(inter) == dict and "col" in inter  and "lin" in inter \
+        if inter is None or not (len(inter) == 2 and "col" in inter  and "lin" in inter \
                 and type(obtem_col(inter)) == str and len(obtem_col(inter)) == 1 and type(obtem_lin(inter)) == int\
                 and chr(65) <= obtem_col(inter) <= chr(64+n) and 0 < obtem_lin(inter) <= n) or inter in geral:
             raise ValueError("cria_goban: argumentos invalidos")
         else:
             geral += [inter,]
     for inter in P:
-        if inter is None or not (eh_intersecao(inter) and len(inter) == 2 and "col" in inter and "lin" in inter \
+        if inter is None or not (len(inter) == 2 and "col" in inter and "lin" in inter \
                 and type(obtem_col(inter)) == str and len(obtem_col(inter)) == 1 and type(obtem_lin(inter)) == int\
                 and chr(65) <= obtem_col(inter) <= chr(64+n) and 0 < obtem_lin(inter) <= n) or inter in geral:
             raise ValueError("cria_goban: argumentos invalidos")
@@ -426,3 +426,4 @@ def go(n, ib, ip):
     if calcula_pontos(gob)[0] > calcula_pontos(gob)[1]:
         return True
     return False
+
