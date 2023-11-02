@@ -60,13 +60,13 @@ def ordena_intersecoes(tup):
         for i in range (len(lis) -1):  
             #Verifica se, para cada interseção, se a interseção seguinte 
             #tem linha de ordem menor, se for o caso, trocam de ordem no tuplo 
-            if lis[i]["lin"] > lis[i+1]["lin"]:
+            if obtem_lin(lis[i]) > obtem_lin(lis[i+1]):
                     lis[i], lis[i+1] = lis[i+1], lis[i]
                     a=0
-            elif lis[i]["lin"] == lis[i+1]["lin"]:
+            elif obtem_lin(lis[i]) == obtem_lin(lis[i+1]):
                 #Se tiverem a mesma linha verifica se a seguinte tem coluna de menor ordem,
                 #se for o caso, trocam de ordem no tuplo
-                if lis[i]["col"] > lis[i+1]["col"]:
+                if obtem_col(lis[i]) > obtem_col(lis[i+1]):
                     lis[i], lis[i+1] = lis[i+1], lis[i]
                     a=0
     tup = tuple(lis) #Torna a lista num tuplo
@@ -135,16 +135,16 @@ def cria_goban(n, B, P):
         raise ValueError("cria_goban_vazio: argumento invalido")
     geral = []
     for inter in B:
-        if inter is None or not (type(inter) == dict and len(inter.keys()) == 2 and "col" in inter.keys()  and "lin" in inter.keys() \
-                and type(inter["col"]) == str and len(inter["col"]) == 1 and type(inter["lin"]) == int\
-                and chr(65) <= inter["col"] <= chr(64+n) and 0 < inter["lin"] <= n) or inter in geral:
+        if inter is None or not (eh_intersecao(inter) == dict and "col" in inter  and "lin" in inter \
+                and type(obtem_col(inter)) == str and len(obtem_col(inter)) == 1 and type(obtem_lin(inter)) == int\
+                and chr(65) <= obtem_col(inter) <= chr(64+n) and 0 < obtem_lin(inter) <= n) or inter in geral:
             raise ValueError("cria_goban: argumentos invalidos")
         else:
             geral += [inter,]
     for inter in P:
-        if inter is None or not (type(inter) == dict and len(inter.keys()) == 2 and "col" in inter.keys() and "lin" in inter.keys() \
-                and type(inter["col"]) == str and len(inter["col"]) == 1 and type(inter["lin"]) == int\
-                and chr(65) <= inter["col"] <= chr(64+n) and 0 < inter["lin"] <= n) or inter in geral:
+        if inter is None or not (eh_intersecao(inter) and len(inter) == 2 and "col" in inter and "lin" in inter \
+                and type(obtem_col(inter)) == str and len(obtem_col(inter)) == 1 and type(obtem_lin(inter)) == int\
+                and chr(65) <= obtem_col(inter) <= chr(64+n) and 0 < obtem_lin(inter) <= n) or inter in geral:
             raise ValueError("cria_goban: argumentos invalidos")
         else:
             geral += [inter,]
