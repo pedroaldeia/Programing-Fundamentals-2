@@ -13,8 +13,11 @@ def cria_intersecao(col, lin):
          or type(lin) != int or (not (0 < int(lin) < 20)):
             raise ValueError("cria_intersecao: argumentos invalidos")
         return {"col": col, "lin": lin}
-    except ValueError or TypeError:
+    except ValueError:
         raise ValueError("cria_intersecao: argumentos invalidos")
+    except TypeError as e:
+        if "unhashable type: dict" in str(e):
+            raise ValueError("cria_intersecao: argumentos invalidos")
 
 def obtem_col(inter):
     '''obtem col: intersecao → str
@@ -233,7 +236,11 @@ def cria_goban(n, B, P):
         goban_vazio = cria_goban_vazio(n)
         goban_vazio.update({"B": B, "P": P})
 
-    except ValueError or TypeError or AttributeError:
+    except ValueError:
+        raise ValueError("cria_goban: argumentos invalidos")
+    except AttributeError:
+        raise ValueError("cria_goban: argumentos invalidos")
+    except TypeError:
         raise ValueError("cria_goban: argumentos invalidos")
     
     return goban_vazio
@@ -343,17 +350,19 @@ def eh_goban(gob):
     '''eh goban: universal → booleano
     eh goban(arg) devolve True caso o seu argumento seja um TAD goban e False
     caso contrário.'''
-
-    if not (type(gob) == dict and len(gob) == 3 and "n", "B", "P" in gob\
-             and gob["n"] in (9, 13, 19)):
+    try:
+        if not (type(gob) == dict and len(gob) == 3 and "n", "B", "P" in gob\
+                and gob["n"] in (9, 13, 19)):
+            return False
+        for inter in gob["B"]:
+            if not eh_intersecao_valida(gob, inter):
+                return False
+        for inter in gob["P"]:
+            if not eh_intersecao_valida(gob, inter):
+                return False
+        return True
+    except AttributeError:
         return False
-    for inter in gob["B"]:
-        if not eh_intersecao_valida(gob, inter):
-            return False
-    for inter in gob["P"]:
-        if not eh_intersecao_valida(gob, inter):
-            return False
-    return True
         
 def eh_intersecao_valida(gob, inter):
     '''eh intersecao valida: goban x intersecao → booleano
@@ -547,8 +556,12 @@ def turno_jogador(gob, p, copgob):
             arg = str(input("Escreva uma intersecao ou 'P' para passar [O]:"))
         else:
             arg = str(input("Escreva uma intersecao ou 'P' para passar [X]:"))
-    gob = jogada(gob, str_para_intersecao(arg), p)
-    return True
+    try:
+        gob = jogada(gob, str_para_intersecao(arg), p)
+        return True
+    except ValueError:
+        turno_jogador(gob, p, copgob)
+    
 
 def go(n, ib, ip):
     '''go: int x tuple x tuple 7→ booleano (1,5 valores)
