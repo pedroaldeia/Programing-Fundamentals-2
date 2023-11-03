@@ -283,11 +283,17 @@ def cria_copia_goban(gob):
 
     copia = {}
     if isinstance(gob, dict):
+    #Se o objeto a copiar for dicionário, adiciona à cópia a key e chama recusivamente 
+    #uma cópia do objeto correspondente no goban original
         for key, objeto in gob.items():
             copia[key] = cria_copia_goban(objeto)
     elif isinstance(gob, tuple):
+    #Se o objeto a copiar for tuplo, adiciona à cópia o tuplo e chama recusivamente 
+    #uma cópia do objeto correspondente aos objetos dentro dos tuplos no goban original
         return tuple(cria_copia_goban(objeto) for objeto in gob)
     else:
+    #Se não for nem tuplo nem dicionário, quer dizer que o objeto são os elementos dentro
+    #do tuplo, logo basta devolver o elemento
         return gob
     return copia
 
@@ -303,10 +309,13 @@ def obtem_pedra(gob, inter):
     obtem pedra(g, i) devolve a pedra na interseção i do goban g. Se a posição
     não estiver ocupada, devolve uma pedra neutra'''
 
-    if inter in gob["B"]:
+    if inter in gob["B"]: 
+    #Se a interseção estiver nas interceções com pedras brancas, devolve uma pedra branca
         return "B"
     if inter in gob["P"]:
+    #Se a interseção estiver nas interceções com pedras preta, devolve uma pedra preta
         return "P"
+    #Caso contrário, devolve uma pedra neutra
     return "N"
 
 def obtem_cadeia(gob, inter):
@@ -316,21 +325,14 @@ def obtem_cadeia(gob, inter):
     estiver ocupada, devolve a cadeia de posições livres.'''
 
     cadeia = [inter,] 
-    b = False
-    p = False
-    if inter in gob["B"]:
-        b = True
-    if inter in gob["P"]:
-        p = True
     for dic in cadeia:
         dic_adj = obtem_intersecoes_adjacentes(dic, obtem_ultima_intersecao(gob))  
         #cria um tuplo para as interseções adjacentes
         for adj in dic_adj:
-            if (((b and (adj in gob["B"])) or (p and adj in gob["P"]) or \
-                 (not(adj in gob["B"]) and not(adj in gob["P"]) and not p and not b))\
-                 and not adj in cadeia):
-                    #Verifica se as interseções adjacentes são do mesmo tipo (livres ou ocupadas) que 
-                    #a original e também se já estão contidas na lista
+            if (pedras_iguais(obtem_pedra(gob, inter), obtem_pedra(gob, adj)) \
+                and not adj in cadeia):
+                #Verifica se as pedras das interseções original e adjacente são 
+                #iguais e também se já estão contidas na lista
                     cadeia += [adj,] #Se for o caso são adicionadas à lista
                     #O ciclo repete-se para todos os elementos da lista
     return ordena_intersecoes(cadeia)
@@ -340,8 +342,10 @@ def coloca_pedra(gob, inter, p):
     coloca pedra(g, i, p) modifica destrutivamente o goban g colocando a pedra
     do jogador p na interseção i, e devolve o próprio goban.'''
 
-    if eh_pedra_jogador(p):
-        if eh_pedra_branca(p):
+    if eh_pedra_jogador(p): 
+    #Conforme o tipo de pedra, adiciona a interseção ao tuplo do jogador e
+    #atualiza o tabuleiro
+        if eh_pedra_branca(p): 
             conj_inter = list(gob["B"])
             conj_inter.append(inter)
             gob.update({p: tuple(conj_inter)})
@@ -349,20 +353,18 @@ def coloca_pedra(gob, inter, p):
             conj_inter = list(gob["P"])
             conj_inter.append(inter)
             gob.update({p: tuple(conj_inter)})
-    return gob
+    return gob #Devolve o tabuleiro já alterado
 
 def remove_pedra(gob, inter):
-    '''remove pedra: goban x intersecao 7→ goban
+    '''remove pedra: goban x intersecao → goban
     remove pedra(g, i) modifica destrutivamente o goban g removendo a pedra
     da interseção i, e devolve o próprio goban.'''
 
-    if inter in gob["B"]:
-        new_B = tuple(i for i in gob["B"] if i != inter)
-        gob.update({"B": new_B})
-    if inter in gob["P"]:
-        new_P = tuple(i for i in gob["P"] if i != inter)
-        gob.update({"P": new_P})
-    return gob
+    pedra = obtem_pedra(gob, inter)  
+    new_B = tuple(i for i in gob[pedra] if i != inter) 
+    #Retira a interseção do tuplo correspondente às interseções ocupadas pelas pedras do jogador
+    gob.update({pedra: new_B})
+    return gob #Devolve o tabuleiro atualizado
 
 def remove_cadeia(gob, cadeia):
     '''remove cadeia: goban x tuplo → goban
@@ -370,29 +372,32 @@ def remove_cadeia(gob, cadeia):
     nas interseções to tuplo t, e devolve o próprio goban.'''
 
     for inter in cadeia:
-        if inter in gob["B"]:
-            novo_gob_B = tuple(i for i in gob["B"] if i != inter)
-            gob.update({"B": novo_gob_B})
-        if inter in gob["P"]:
-            novo_gob_P = tuple(i for i in gob["P"] if i != inter)
-            gob.update({"P": novo_gob_P})
-    return gob
+    #Para cada interseção na cadeia, remove a interseção do tuplo correspondente 
+    #às interseções ocupadas pelas pedras do jogador
+        remove_pedra(gob, inter)
+    return gob #devolve o tabuleiro atualizado
 
 def eh_goban(gob):
     '''eh goban: universal → booleano
     eh goban(arg) devolve True caso o seu argumento seja um TAD goban e False
     caso contrário.'''
+
     if not (type(gob) == dict and len(gob) == 3 and "n", "B", "P" in gob\
-                and gob["n"] in (9, 13, 19)):
-            return False
+        and gob["n"] in (9, 13, 19)):
+        #Verifica se o argumento é dicionário de len 3, se as keys do dicionário
+        #são "n"(comprimento do tabuleiro), "B"(interseções brancas), e 
+        #"P"(interseções pretas) e se n é 9, 13 ou 19
+            return False #Se não devolve False
     try:
-        for inter in gob["B"]:
+    #Se as interseções em "B" e em "P" não forem válidas no goban, devolve False
+    #Se ocorrer um Assertion Error a verificar estes parametros , devolve False
+        for inter in gob["B"]: 
             if not eh_intersecao_valida(gob, inter):
                 return False
         for inter in gob["P"]:
             if not eh_intersecao_valida(gob, inter):
                 return False
-        return True
+        return True #Se tudo estiver conforme devolve True
     except AttributeError:
         return False
         
@@ -411,6 +416,8 @@ def gobans_iguais(gob1, gob2):
     gobans iguais(g1, g2) devolve True apenas se g1 e g2 forem gobans e forem iguais.'''
 
     if gob1["n"] == gob2["n"]:
+    #Se o tamanho do tabuleiro for igual e se o conjunto de interseções ordenadas de ambos
+    #os gobans for igual, devolve True
         if ordena_intersecoes(gob1["B"]) == ordena_intersecoes(gob2["B"]) and \
             ordena_intersecoes(gob1["P"]) == ordena_intersecoes(gob2["P"]):
             return True
@@ -433,11 +440,12 @@ def goban_para_str(gob):
         else:
             mid += "\n " + str(b)
         while n != gob["n"]:
-             #Adiciona um "." de a interseção correspondente for livre e um "X" caso contrário
+             #Adiciona um " ." se a interseção correspondente for pedra neutra, " X" se for pedra
+             #preta e " O" se for pedra branca
             for inter in gob["B"]:
                 if intersecoes_iguais(cria_intersecao(str(chr(n+65)), b), inter):
                     mid += " O"
-                    a = False
+                    a = False #se a for False, não vai verificar os parâmetros seguintes
             if a:
                 for inter in gob["P"]:
                     if intersecoes_iguais(cria_intersecao(str(chr(n+65)), int(b)), inter):
@@ -446,15 +454,15 @@ def goban_para_str(gob):
             if a:
                 mid += " ."
             a = True
-            n += 1
-        if b > 9:   #Adiciona o número da linha correspondente no fim de cada linha da string
+            n += 1 #O ciclo repete-se até chegar ao final de cada linha
+        if b > 9: #Adiciona o número da linha correspondente no fim de cada linha da string
             mid += " " + str(b)
         else:
             mid += "  " + str(b)
         b -= 1
         n = 0
     
-    return " " + string + mid + "\n " + string
+    return " " + string + mid + "\n " + string #Devolve o tabuleiro em str completo
 
 def obtem_territorios(gob):
     '''obtem territorios: goban → tuplo
@@ -466,22 +474,21 @@ def obtem_territorios(gob):
     geral = []
     territorios = []
     def aux(geral, territorios, inter):
-        if inter not in geral:
-            tup = []
+        if inter not in geral: #Verifica se a interseção já foi adicionada aos territórios
+            lis = []
             for inter1 in obtem_cadeia(gob, inter):
-                tup.append(inter1)
+            #Para cada interseção na cadeia, adiciona-a a um tuplo que depois é adicionado aos 
+            #territórios
+                lis.append(inter1)
                 geral += [inter1,]
-            territorios += [tuple(tup),]
+            territorios += [tuple(lis),]
 
-    for inter in gob["B"]:
-        aux(geral, territorios, inter)
-    for inter in gob["P"]:
-        aux(geral, territorios, inter)
-    for n in range(gob["n"]-1):
+    for n in range(gob["n"]-1): #Aplica a função para todas as interseções do tabuleiro
         aux(geral, territorios, cria_intersecao(chr(65+n), n+1))
-    for tup in territorios:
+    for tup in territorios: #Ordena as interseções dentro dos territórios
         ordena_intersecoes(tup)
     return tuple(sorted(territorios, key=lambda x: obtem_lin(x[0])*10000+ord(obtem_col(x[0]))))
+    #Devolve os territórios ordenados conforme a sua primeira interseção
 
 def obtem_adjacentes_diferentes(gob, tup):
     '''obtem adjacentes diferentes: goban x tuplo → tuplo
@@ -490,22 +497,29 @@ def obtem_adjacentes_diferentes(gob, tup):
     enquanto que o segundo corresponde à fronteira de um território'''
 
     interes = []
+    #Se a pedra for branca ou preta, adiciona a uma lista as interseções adjacentes à cadeia 
+    #em que está contida que estejam ocupadas com pedras neutras
     if eh_pedra_branca(obtem_pedra(gob, tup[0])):
         for inter in tup:
             for inter1 in obtem_intersecoes_adjacentes(inter, obtem_ultima_intersecao(gob)):
-                if not inter1 in interes and not inter1 in tup and not eh_pedra_preta(obtem_pedra(gob, inter1)):
+                if not inter1 in interes and not inter1 in tup and \
+                    not eh_pedra_preta(obtem_pedra(gob, inter1)):
                     interes += [inter1]
     elif eh_pedra_preta(obtem_pedra(gob, tup[0])):
         for inter in tup:
             for inter1 in obtem_intersecoes_adjacentes(inter, obtem_ultima_intersecao(gob)):
-                if not inter1 in interes and not inter1 in tup and not eh_pedra_branca(obtem_pedra(gob, inter1)):
+                if not inter1 in interes and not inter1 in tup and \
+                    not eh_pedra_branca(obtem_pedra(gob, inter1)):
                     interes += [inter1]
+    #Se a pedra for neutra, adiciona a uma lista as interseções adjacentes à cadeia em que 
+    #está contida que sejam pedras de jogador
     else:
         for inter in tup:
             for inter1 in obtem_intersecoes_adjacentes(inter, obtem_ultima_intersecao(gob)):
                 if not inter1 in interes and not inter1 in tup:
                     interes += [inter1]
-    return tuple(ordena_intersecoes(interes))
+    return tuple(ordena_intersecoes(interes)) 
+    #Devolve a um tuplo correspondente à lista criada depois de ordenada 
 
 def jogada(gob, inter, p):
     '''jogada: goban x intersecao x pedra → goban
@@ -513,23 +527,31 @@ def jogada(gob, inter, p):
     p na interseção i e remove todas as pedras do jogador contrário pertencentes a
     cadeias adjacentes à i sem liberdades, devolvendo o próprio goban'''
 
-    if not eh_pedra_branca(obtem_pedra(gob, inter)) and not eh_pedra_preta(obtem_pedra(gob, inter)):
+    if not eh_pedra_branca(obtem_pedra(gob, inter)) and \
+        not eh_pedra_preta(obtem_pedra(gob, inter)):
         coloca_pedra(gob, inter, p)
+        #Se a interseção dada não estiver ocupada, é colocada uma pedra do jogador na interseção
     if eh_pedra_branca(p):
         for adj in obtem_intersecoes_adjacentes(inter, obtem_ultima_intersecao(gob)):
-            if eh_pedra_preta(obtem_pedra(gob, adj)) and obtem_adjacentes_diferentes(gob, obtem_cadeia(gob, adj)) == ():
+            if eh_pedra_preta(obtem_pedra(gob, adj)) and \
+                obtem_adjacentes_diferentes(gob, obtem_cadeia(gob, adj)) == ():
                 remove_cadeia(gob, obtem_cadeia(gob, adj))
+            #Se uma pedra adjacente à colocada for do jogador contrário e perder as 
+            #liberdades, é removida a cadeia em que essa pedra está contida
     if eh_pedra_preta(p):
         for adj in obtem_intersecoes_adjacentes(inter, obtem_ultima_intersecao(gob)):
-            if eh_pedra_branca(obtem_pedra(gob, adj)) and obtem_adjacentes_diferentes(gob, obtem_cadeia(gob, adj)) == ():
+            if eh_pedra_branca(obtem_pedra(gob, adj)) and \
+                obtem_adjacentes_diferentes(gob, obtem_cadeia(gob, adj)) == ():
                 remove_cadeia(gob, obtem_cadeia(gob, adj))
     return gob
 
 def obtem_pedras_jogadores(gob):
-    '''obtem pedras jogadores: goban 7→ tuplo
+    '''obtem pedras jogadores: goban → tuplo
     obtem pedras jogadores(g) devolve um tuplo de dois inteiros que correspondem ao
     número de interseções ocupadas por pedras do jogador branco e preto, respetivamente.'''
 
+    #Devolve um tuplo com a len dos tuplos interseções de cada jogador, correspondente à quantidade
+    #de pedras que eles têm em jogo
     return (len(gob["B"]), len(gob["P"]))
 
 #Funções adicionais
@@ -539,20 +561,26 @@ def calcula_pontos(gob):  #2.2.1
     calcula pontos(g) é uma função auxiliar que recebe um goban e devolve o tuplo de dois
     inteiros com as pontuações dos jogadores branco e preto, respetivamente.'''
 
-    count_b = len(gob["B"])
-    count_p = len(gob["P"])
-    if count_b == 0 and count_p == 0:
-        return (count_b, count_p)
+    count_b = len(gob["B"]) #Adiciona à contagem de cada jogador a quantidade de
+    count_p = len(gob["P"]) #pedras que têm em jogo
+    if count_b == 0 and count_p == 0: #Se não houverem interseçõespara nenhum dos lados, 
+        return (count_b, count_p)     #a contagem é nula para ambos os jogadores
     for interes in obtem_territorios(gob):
-        if not eh_pedra_branca(obtem_pedra(gob, interes[0])) and not eh_pedra_preta(obtem_pedra(gob, interes[0])):
-            if all(eh_pedra_branca(obtem_pedra(gob, inter)) for inter in obtem_adjacentes_diferentes(gob, interes)):
+        if eh_pedra_neutra(gob, interes[0]):
+        #Se o território for de pedras neutras e se as pedras adjacentes ao território forem
+        #todas ou brancas ou pretas, adiciona-se a quantidade de interseções nessa cadeia
+        #à contagem do respetivo jogador
+            if all(eh_pedra_branca(obtem_pedra(gob, inter)) for inter in \
+                obtem_adjacentes_diferentes(gob, interes)):
                 count_b += len(interes)
-            if all(eh_pedra_preta(obtem_pedra(gob, inter)) for inter in obtem_adjacentes_diferentes(gob, interes)):
+
+            if all(eh_pedra_preta(obtem_pedra(gob, inter)) for inter in \
+                obtem_adjacentes_diferentes(gob, interes)):
                 count_p += len(interes)
-    return (count_b, count_p)
+    return (count_b, count_p) #Devolve a contagem
 
 def eh_jogada_legal(gob, inter, p, copgob):
-    '''eh jogada legal: goban x intersecao x pedra x goban 7→ booleano 
+    '''eh jogada legal: goban x intersecao x pedra x goban → booleano 
     eh jogada legal(g, i, p, l) é uma função auxiliar que recebe um goban g, uma interseção
     i, uma pedra de jogador p e um outro goban l e devolve True se a jogada for legal ou
     False caso contrário, sem modificar g ou l. Para a deteção de repetição, considere que l
@@ -560,7 +588,8 @@ def eh_jogada_legal(gob, inter, p, copgob):
     jogada.'''
 
     g_copia = cria_copia_goban(gob)
-    if eh_goban(gob) and eh_intersecao_valida(gob, inter) and not eh_pedra_preta(obtem_pedra(gob, inter)) and not eh_pedra_branca(obtem_pedra(gob, inter)):
+    if eh_goban(gob) and eh_intersecao_valida(gob, inter) and not eh_pedra_preta(obtem_pedra(gob, inter)) and \
+          not eh_pedra_branca(obtem_pedra(gob, inter)):
         if obtem_adjacentes_diferentes(jogada(g_copia, inter, p), obtem_cadeia(jogada(g_copia, inter, p), inter)) == ():
             return False
         if jogada(g_copia, inter, p) != copgob:
