@@ -13,7 +13,7 @@ def cria_intersecao(col, lin):
          or type(lin) != int or (not (0 < int(lin) < 20)):
             raise ValueError("cria_intersecao: argumentos invalidos")
         return {"col": col, "lin": lin}
-    except ValueError:
+    except ValueError or TypeError:
         raise ValueError("cria_intersecao: argumentos invalidos")
 
 def obtem_col(inter):
@@ -33,7 +33,7 @@ def eh_intersecao(dic):
     eh intersecao(arg) devolve True caso o seu argumento seja um TAD intersecao
     e False caso contrário.'''
 
-    if type(dic) != dict or len(dic) != 2 or not("col", "lis" in dic.keys())\
+    if type(dic) != dict or len(dic) != 2 or not("col", "lis" in dic)\
         or type(obtem_col(dic)) != str or len(obtem_col(dic)) != 1 or not (64 < ord(obtem_col(dic)) < 85)\
             or type(obtem_lin(dic)) != int or  not (0 < obtem_lin(dic) < 20):
         return False
@@ -232,8 +232,10 @@ def cria_goban(n, B, P):
     try:
         goban_vazio = cria_goban_vazio(n)
         goban_vazio.update({"B": B, "P": P})
-    except ValueError:
+
+    except ValueError or TypeError or AttributeError:
         raise ValueError("cria_goban: argumentos invalidos")
+    
     return goban_vazio
 
 def cria_copia_goban(gob):
@@ -252,7 +254,8 @@ def cria_copia_goban(gob):
 
 def obtem_ultima_intersecao(gob):
     '''obtem ultima intersecao: goban → intersecao
-    obtem ultima intersecao(g) devolve a interseção que corresponde ao canto superior direito do goban g.'''
+    obtem ultima intersecao(g) devolve a interseção que corresponde ao 
+    canto superior direito do goban g.'''
 
     return {"col": chr(gob["n"]+64), "lin": gob["n"]}
 
@@ -341,7 +344,7 @@ def eh_goban(gob):
     eh goban(arg) devolve True caso o seu argumento seja um TAD goban e False
     caso contrário.'''
 
-    if not (type(gob) == dict and len(gob) == 3 and "n", "B", "P" in gob.keys()\
+    if not (type(gob) == dict and len(gob) == 3 and "n", "B", "P" in gob\
              and gob["n"] in (9, 13, 19)):
         return False
     for inter in gob["B"]:
@@ -446,15 +449,15 @@ def obtem_adjacentes_diferentes(gob, tup):
     enquanto que o segundo corresponde à fronteira de um território'''
 
     interes = []
-    if tup[0] in gob["B"]:
+    if eh_pedra_branca(obtem_pedra(gob, tup[0])):
         for inter in tup:
             for inter1 in obtem_intersecoes_adjacentes(inter, obtem_ultima_intersecao(gob)):
-                if not inter1 in interes and not inter1 in tup and not inter1 in gob["P"]:
+                if not inter1 in interes and not inter1 in tup and not eh_pedra_preta(obtem_pedra(gob, inter1)):
                     interes += [inter1]
-    elif tup[0] in gob["P"]:
+    elif eh_pedra_preta(obtem_pedra(gob, tup[0])):
         for inter in tup:
             for inter1 in obtem_intersecoes_adjacentes(inter, obtem_ultima_intersecao(gob)):
-                if not inter1 in interes and not inter1 in tup and not inter1 in gob["B"]:
+                if not inter1 in interes and not inter1 in tup and not eh_pedra_branca(obtem_pedra(gob, inter1)):
                     interes += [inter1]
     else:
         for inter in tup:
@@ -469,15 +472,15 @@ def jogada(gob, inter, p):
     p na interseção i e remove todas as pedras do jogador contrário pertencentes a
     cadeias adjacentes à i sem liberdades, devolvendo o próprio goban'''
 
-    if not inter in gob["P"] and not inter in gob["B"]:
+    if not eh_pedra_branca(obtem_pedra(gob, inter)) and not eh_pedra_preta(obtem_pedra(gob, inter)):
         coloca_pedra(gob, inter, p)
-    if p == "B":
+    if eh_pedra_branca(p):
         for adj in obtem_intersecoes_adjacentes(inter, obtem_ultima_intersecao(gob)):
-            if adj in gob["P"] and obtem_adjacentes_diferentes(gob, obtem_cadeia(gob, adj)) == ():
+            if eh_pedra_preta(obtem_pedra(gob, adj)) and obtem_adjacentes_diferentes(gob, obtem_cadeia(gob, adj)) == ():
                 remove_cadeia(gob, obtem_cadeia(gob, adj))
-    if p == "P":
+    if eh_pedra_preta(p):
         for adj in obtem_intersecoes_adjacentes(inter, obtem_ultima_intersecao(gob)):
-            if adj in gob["B"] and obtem_adjacentes_diferentes(gob, obtem_cadeia(gob, adj)) == ():
+            if eh_pedra_branca(obtem_pedra(gob, adj)) and obtem_adjacentes_diferentes(gob, obtem_cadeia(gob, adj)) == ():
                 remove_cadeia(gob, obtem_cadeia(gob, adj))
     return gob
 
@@ -500,10 +503,10 @@ def calcula_pontos(gob):  #2.2.1
     if count_b == 0 and count_p == 0:
         return (count_b, count_p)
     for interes in obtem_territorios(gob):
-        if not interes[0] in gob["B"] and not interes[0] in gob["P"]:
-            if all(inter in gob["B"] for inter in obtem_adjacentes_diferentes(gob, interes)):
+        if not eh_pedra_branca(obtem_pedra(gob, interes[0])) and not eh_pedra_preta(obtem_pedra(gob, interes[0])):
+            if all(eh_pedra_branca(obtem_pedra(gob, inter)) for inter in obtem_adjacentes_diferentes(gob, interes)):
                 count_b += len(interes)
-            if all(inter in gob["P"] for inter in obtem_adjacentes_diferentes(gob, interes)):
+            if all(eh_pedra_preta(obtem_pedra(gob, inter)) for inter in obtem_adjacentes_diferentes(gob, interes)):
                 count_p += len(interes)
     return (count_b, count_p)
 
@@ -516,7 +519,7 @@ def eh_jogada_legal(gob, inter, p, copgob):
     jogada.'''
 
     g_copia = cria_copia_goban(gob)
-    if eh_goban(gob) and eh_intersecao_valida(gob, inter) and not inter in gob["P"] and not inter in gob["B"]:
+    if eh_goban(gob) and eh_intersecao_valida(gob, inter) and not eh_pedra_preta(obtem_pedra(gob, inter)) and not eh_pedra_branca(obtem_pedra(gob, inter)):
         if obtem_adjacentes_diferentes(jogada(g_copia, inter, p), obtem_cadeia(jogada(g_copia, inter, p), inter)) == ():
             return False
         if jogada(g_copia, inter, p) != copgob:
