@@ -493,8 +493,8 @@ def obtem_territorios(gob):
 def obtem_adjacentes_diferentes(gob, tup):
     '''obtem adjacentes diferentes: goban x tuplo → tuplo
     obtem adjacentes diferentes(g, t) devolve o tuplo ordenado formado pelas interseções
-    adjacentes às interseções do tuplo t correspondente às liberdades de uma cadeia de pedras,
-    enquanto que o segundo corresponde à fronteira de um território'''
+    adjacentes às interseções do tuplo t correspondente às liberdades de uma cadeia de pedras
+    se for pedra de jogador, se for pedra neutra devolve a fronteira do seu território'''
 
     interes = []
     #Se a pedra for branca ou preta, adiciona a uma lista as interseções adjacentes à cadeia 
@@ -583,18 +583,18 @@ def eh_jogada_legal(gob, inter, p, copgob):
     '''eh jogada legal: goban x intersecao x pedra x goban → booleano 
     eh jogada legal(g, i, p, l) é uma função auxiliar que recebe um goban g, uma interseção
     i, uma pedra de jogador p e um outro goban l e devolve True se a jogada for legal ou
-    False caso contrário, sem modificar g ou l. Para a deteção de repetição, considere que l
-    representa o estado de tabuleiro que não pode ser obtido após a resolução completa da
-    jogada.'''
+    False caso contrário, sem modificar g ou l.'''
 
     g_copia = cria_copia_goban(gob)
-    if eh_goban(gob) and eh_intersecao_valida(gob, inter) and not eh_pedra_preta(obtem_pedra(gob, inter)) and \
-          not eh_pedra_branca(obtem_pedra(gob, inter)):
-        if obtem_adjacentes_diferentes(jogada(g_copia, inter, p), obtem_cadeia(jogada(g_copia, inter, p), inter)) == ():
-            return False
+    if eh_intersecao_valida(gob, inter) and eh_pedra_neutra(obtem_pedra(gob, inter)):
+        #Se a interseção for válida e se já não estiver ocupada:
+        if obtem_adjacentes_diferentes(jogada(g_copia, inter, p), \
+           obtem_cadeia(jogada(g_copia, inter, p), inter)) == ():
+            return False #Se alguma cadeia do jogador ficar se liberdades devolve False
         if jogada(g_copia, inter, p) != copgob:
-            return True
-    return False
+            #E se a jogada não der origem a repetição do estado anterior, devolve True
+            return True 
+    return False #Caso contrário devolve False
         
 def turno_jogador(gob, p, copgob):
     '''turno jogador: goban x pedra x goban → booleano
@@ -606,39 +606,44 @@ def turno_jogador(gob, p, copgob):
 
     arg = ""
     while arg == "":
-        if eh_pedra_branca(p):
+        #Se o argumento for string vazia, repete a função
+        if eh_pedra_branca(p): #Se a pedra for branca, aparece [0] no final
             arg = str(input("Escreva uma intersecao ou 'P' para passar [O]:"))
-        else:
+        else: #Se for preta, aparece [X]
             arg = str(input("Escreva uma intersecao ou 'P' para passar [X]:"))
     while not eh_jogada_legal(gob, str_para_intersecao(arg), p, copgob):
-        if arg == "P":
+        #Se a jogada não for legal, repete a função
+        if arg == "P": #Se o jogador passar, devolve False
             return False
         if eh_pedra_branca(p):
             arg = str(input("Escreva uma intersecao ou 'P' para passar [O]:"))
         else:
             arg = str(input("Escreva uma intersecao ou 'P' para passar [X]:"))
-
-    gob = jogada(gob, str_para_intersecao(arg), p)
-    return True
+    #Se a jogada for legal, o goban é substituido pelo jogan com a jogada feita
+    gob = jogada(gob, str_para_intersecao(arg), p) 
+    return True #E devolve True
    
     
 
 def go(n, ib, ip):
-    '''go: int x tuple x tuple 7→ booleano (1,5 valores)
+    '''go: int x tuple x tuple → booleano (1,5 valores)
     go(n, tb, tn) é a função principal que permite jogar um jogo completo do Go de dois
-    jogadores. A função recebe um inteiro correspondente `a dimensão do tabuleiro, e dois
+    jogadores. A função recebe um inteiro correspondente à dimensão do tabuleiro, e dois
     tuplos (potencialmente vazios) com a representação externa das interseções ocupadas
     por pedras brancas (tb) e pretas (tp) inicialmente. O jogo termina quando os dois
     jogadores passam a vez de jogar consecutivamente. A função devolve True se o jogador
-    com pedras brancas conseguir ganhar o jogo, ou False caso contrário. A função deve
-    verificar a validade dos seus argumentos, gerando um ValueError com a mensagem
-    'go: argumentos invalidos' caso os seus argumentos não sejam válidos.'''
+    com pedras brancas conseguir ganhar o jogo, ou False caso contrário. Verifica a 
+    validade dos seus argumentos'''
 
     passcount = 0
-    if not(isinstance(ib, tuple) and isinstance(ip, tuple) and isinstance(n, int) and n in (9, 13, 19)):
+    if not(isinstance(ib, tuple) and isinstance(ip, tuple) and isinstance(n, int) and \
+        n in (9, 13, 19)):
+        #Levanta erro se ib e ip não forem tuplos e se n não for número inteiro 9, 13 ou 19
         raise ValueError("go: argumentos invalidos")
     if len(ib) > 0 or len(ip) > 0:
         try:
+        #Verifica se é possível criar um tuplo com interseções a partir dos argumentos em 
+        #ib e ip e se é possível criar um goban com esses tuplos
             for i in ib:
                 if type(i) != str:
                     raise ValueError("go: argumentos invalidos")
@@ -653,17 +658,21 @@ def go(n, ib, ip):
     else:
         gob = cria_goban_vazio(n)
     b = cria_pedra_preta()
-    while passcount < 2:
-        print ("Branco (O) tem", calcula_pontos(gob)[0], "pontos\nPreto (X) tem", calcula_pontos(gob)[1], "pontos") 
+    while passcount < 2: 
+        #Enquanto os dois jogadores não tiverem passado a jogada consecutivamente, 
+        #continua a repetir
+        print ("Branco (O) tem", calcula_pontos(gob)[0], "pontos\nPreto (X) tem", \
+               calcula_pontos(gob)[1], "pontos") #Dá print à tabela dos pontos e ao tabuleiro
         print(goban_para_str(gob))
-        a = turno_jogador(gob, b, cria_copia_goban(gob))
-        if not a:
+        a = turno_jogador(gob, b, cria_copia_goban(gob)) #Dá jogada ao jogador
+        if not a: #Verifica se o jogador passou a jogada
             passcount += 1
-        else:
+        else: #Se não passou, a contagem passa a 0
             passcount = 0
         if passcount < 2:
             b = cria_pedra_branca()
-            print ("Branco (O) tem", calcula_pontos(gob)[0], "pontos\nPreto (X) tem", calcula_pontos(gob)[1], "pontos") 
+            print ("Branco (O) tem", calcula_pontos(gob)[0], "pontos\nPreto (X) tem", \
+                   calcula_pontos(gob)[1], "pontos") 
             print(goban_para_str(gob))
             a = turno_jogador(gob, b, cria_copia_goban(gob))
             if not a:
@@ -671,9 +680,11 @@ def go(n, ib, ip):
             else:
                 passcount = 0
             b = cria_pedra_preta()
-    print ("Branco (O) tem", calcula_pontos(gob)[0], "pontos\nPreto (X) tem", calcula_pontos(gob)[1], "pontos") 
-    print(goban_para_str(gob))
-    if calcula_pontos(gob)[0] > calcula_pontos(gob)[1]:
+    print ("Branco (O) tem", calcula_pontos(gob)[0], "pontos\nPreto (X) tem", \
+           calcula_pontos(gob)[1], "pontos") #Dá print à tabela final
+    print(goban_para_str(gob)) #Dá print ao tabuleiro final
+    if calcula_pontos(gob)[0] > calcula_pontos(gob)[1]: 
+        #Se o jogador branco tem mais pontos, devolve True
         return True
-    return False
+    return False #Caso contrário devolve False
 
