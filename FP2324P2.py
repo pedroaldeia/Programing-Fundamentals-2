@@ -566,7 +566,7 @@ def calcula_pontos(gob):  #2.2.1
     if count_b == 0 and count_p == 0: #Se não houverem interseçõespara nenhum dos lados, 
         return (count_b, count_p)     #a contagem é nula para ambos os jogadores
     for interes in obtem_territorios(gob):
-        if eh_pedra_neutra(gob, interes[0]):
+        if eh_pedra_neutra(obtem_pedra(gob, interes[0])):
         #Se o território for de pedras neutras e se as pedras adjacentes ao território forem
         #todas ou brancas ou pretas, adiciona-se a quantidade de interseções nessa cadeia
         #à contagem do respetivo jogador
