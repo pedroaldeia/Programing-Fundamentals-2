@@ -5,31 +5,34 @@ def cria_intersecao(col, lin):
     '''cria intersecao: str x int → intersecao
     cria intersecao(col,lin) recebe um caracter e um inteiro correspondentes à
     coluna col e `a linha lin e devolve a interseção correspondente.'''
-
     try:
+        #Verifica se "lin" pode ser tornado em string e em número inteiro
+        #Verifica se "col" pode ser tornado numa string
         int(str(lin))
         str(col)
-        if type(col) != str or len(col) != 1 or (not (64 < ord(col) < 84))\
-         or type(lin) != int or (not (0 < int(lin) < 20)):
-            raise ValueError("cria_intersecao: argumentos invalidos")
-        return {"col": col, "lin": lin}
-    except ValueError:
+    except ValueError or TypeError:
         raise ValueError("cria_intersecao: argumentos invalidos")
-    except TypeError as e:
-        if "unhashable type: dict" in str(e):
+    
+    if type(col) != str or len(col) != 1 or (not (64 < ord(col) < 84))\
+         or type(lin) != int or (not (0 < int(lin) < 20)):
+            #Verifica se "col" é argumento válido (é str e é uma letra maiúscula do abecedário)
+            #Verifica se "int" é argumento válido (é número inteiro e entre 1 e 20)
             raise ValueError("cria_intersecao: argumentos invalidos")
+    
+    return {"col": col, "lin": lin}
+    
 
 def obtem_col(inter):
     '''obtem col: intersecao → str
     obtem col(i) devolve a coluna col da interseção i'''
-
-    return inter["col"]
+    
+    return inter["col"] #Devolve o correspondente a "col" na interseção dada
 
 def obtem_lin(inter):
     '''obtem lin: intersecao → int
     obtem lin(i) devolve a linha lin da interseção i.'''
 
-    return inter["lin"]
+    return inter["lin"] #Devolve o correspondente a "lin" na interseção dada
 
 def eh_intersecao(dic):
     '''eh intersecao: universal → booleano
@@ -39,15 +42,21 @@ def eh_intersecao(dic):
     if type(dic) != dict or len(dic) != 2 or not("col", "lis" in dic)\
         or type(obtem_col(dic)) != str or len(obtem_col(dic)) != 1 or not (64 < ord(obtem_col(dic)) < 85)\
             or type(obtem_lin(dic)) != int or  not (0 < obtem_lin(dic) < 20):
-        return False
-    return True
+        #Verifica se o argumento dado é dicionário pelos seguintes parâmetros:
+        #-"dic" é dicionário de len 2 e contém as keys "col" e "lis"
+        #-Tanto "col" como "lin" são argumentos válidos que correspondem a uma string de len 1 que representa
+        #uma letra do abecedário maiúscula e a um número inteiro entre 1 e 20, respetivamente
+        return False #Se não for devolve "False"
+    return True #Se for devolve "True"
 
 def intersecoes_iguais(dic1, dic2):
-    '''intersecoes iguais: universal × universal → booleano
+    '''intersecoes iguais: universal x universal → booleano
     intersecoes iguais(i1, i2) devolve True apenas se i1 e i2 são interseções e são
     iguais, e False caso contrário.'''
 
     if obtem_col(dic1) == obtem_col(dic2) and obtem_lin(dic1) == obtem_lin(dic2):
+        #Se tanto as colunas como as linhas das duas interseções forem iguais
+        #devolve True, caso contrário devolve False
         return True
     return False
 
@@ -56,31 +65,47 @@ def intersecao_para_str(inter):
     intersecao para str(i) devolve a cadeia de caracteres que representa o seu
     argumento.'''
 
+    #Devolve uma string constituída pela coluna e pela linha da interseção dada
     return str(obtem_col(inter)) + str(obtem_lin(inter))
 
-def str_para_intersecao(string):
+def str_para_intersecao(inter_string):
     '''str para intersecao: str → intersecao
     str para intersecao(s) devolve a interseção representada pelo seu argumento.'''
 
-    if len(string) == 2:
-        return cria_intersecao(str(string[0]), int(string[1]))
-    if len(string) == 3:
-        return cria_intersecao(str(string[0]), int(string[1:]))
+    if len(inter_string) == 2: 
+        #Se a str tiver len 2, devolve uma interseção com coluna correspondente a
+        #str[0] e com linha correspondente a str[1]
+        return cria_intersecao(str(inter_string[0]), int(inter_string[1]))
+    if len(inter_string) == 3:
+        #Se s str tiver len 3, a linha passa a corresponder à str exceto o primeiro
+        #elemento
+        return cria_intersecao(str(inter_string[0]), int(inter_string[1:]))
 
 def obtem_intersecoes_adjacentes(inter, canto):
-    '''obtem intersecoes adjacentes: intersecao × intersecao → tuplo
+    '''obtem intersecoes adjacentes: intersecao x intersecao → tuplo
     obtem intersecoes adjacentes(i, l) devolve um tuplo com as interseções adjacentes
     à interseção i de acordo com a ordem de leitura em que l corresponde à interseção
     superior direita do tabuleiro de Go.'''
 
     intersecoes = ()
     if obtem_lin(inter) != 1:
+    #Se a linha da interseção não corresponder à primeira linha, adiciona a interseção 
+    #adjacente diretamente abaixo da mesma
         intersecoes += ({"col": obtem_col(inter), "lin": obtem_lin(inter) - 1},)
+
     if obtem_col(inter) != "A":
+    #Se a coluna da interseção não corresponder à primeira coluna, adiciona a interseção 
+    #adjacente diretamente à esquerda da mesma
         intersecoes += ({"col": chr(ord(obtem_col(inter)) - 1), "lin": obtem_lin(inter)},)
+
     if obtem_col(inter) != obtem_col(canto):
+    #Se a coluna da interseção não corresponder à última coluna, adiciona a interseção 
+    #adjacente diretamente à direita da mesma
         intersecoes += ({"col": chr(ord(obtem_col(inter)) + 1), "lin": obtem_lin(inter)},)
+
     if obtem_lin(inter) != obtem_lin(canto):
+    #Se a linha da interseção não corresponder à última linha, adiciona a interseção 
+    #adjacente diretamente acima da mesma
         intersecoes += ({"col": obtem_col(inter), "lin": obtem_lin(inter) + 1},)
     
     return intersecoes
@@ -99,13 +124,13 @@ def ordena_intersecoes(tup):
             #tem linha de ordem menor, se for o caso, trocam de ordem no tuplo 
             if obtem_lin(lis[i]) > obtem_lin(lis[i+1]):
                     lis[i], lis[i+1] = lis[i+1], lis[i]
-                    a=0
+                    a = 0
             elif obtem_lin(lis[i]) == obtem_lin(lis[i+1]):
                 #Se tiverem a mesma linha verifica se a seguinte tem coluna de menor ordem,
                 #se for o caso, trocam de ordem no tuplo
                 if obtem_col(lis[i]) > obtem_col(lis[i+1]):
                     lis[i], lis[i+1] = lis[i+1], lis[i]
-                    a=0
+                    a = 0
     tup = tuple(lis) #Torna a lista num tuplo
     return tup
 
@@ -115,19 +140,19 @@ def cria_pedra_branca():
     '''cria pedra branca: {} → pedra
     cria pedra branca() devolve uma pedra pertencente ao jogador branco.'''
 
-    return "B"
+    return "B" #Devolve a representação escolhida de uma pedra branca, "B"
 
 def cria_pedra_preta():
     '''cria pedra preta: {} → pedra
     cria pedra preta() devolve uma pedra pertencente ao jogador preto.'''
 
-    return "P"
+    return "P" #Devolve a representação escolhida de uma pedra preta, "P"
 
 def cria_pedra_neutra():
     '''cria pedra neutra: {} → pedra
     cria pedra neutra() devolve uma pedra neutra'''
 
-    return "N"
+    return "N" #Devolve a representação escolhida de uma pedra neutra, "N"
 
 def eh_pedra(p):
     '''eh pedra: universal → booleano
@@ -135,8 +160,9 @@ def eh_pedra(p):
     caso contrário.'''
 
     if type(p) == str and p in ("B", "P", "N"):
-        return True
-    return False
+    #Se "p" corresponder à representação de alguma pedra devolve True
+        return True 
+    return False #Caso contrário devolve False
 
 def eh_pedra_branca(p):
     '''eh pedra branca: pedra → booleano
@@ -144,8 +170,9 @@ def eh_pedra_branca(p):
     caso contrário'''
 
     if type(p) == str and p == "B":
+    #Se "p" corresponder à representação da pedra branca devolve True
         return True
-    return False
+    return False #Caso contrário devolve False
 
 def eh_pedra_preta(p):
     '''eh pedra: universal → booleano
@@ -153,25 +180,28 @@ def eh_pedra_preta(p):
     caso contrário.'''
 
     if type(p) == str and p == "P":
+    #Se "p" corresponder à representação da pedra preta devolve True
         return True
-    return False
+    return False #Caso contrário devolve False
     
 def eh_pedra_neutra(p):
     '''pedras iguais: universal x universal → booleano
     pedras iguais(p1, p2) devolve True apenas se p1 e p2 são pedras e são iguais.'''
 
     if type(p) == str and p == "N":
+    #Se "p" corresponder à representação da pedra neutra devolve True
         return True
-    return False
+    return False #Caso contrário devolve False
     
 def pedras_iguais(p1, p2):
     '''pedras iguais: universal x universal → booleano
     pedras iguais(p1, p2) devolve True apenas se p1 e p2 são pedras e são iguais.'''
 
     if (eh_pedra_branca(p1) and eh_pedra_branca(p2)) or (eh_pedra_preta(p1) and eh_pedra_preta(p2))\
-          or (eh_pedra_neutra(p1) and eh_pedra_neutra(p2)):
+        or (eh_pedra_neutra(p1) and eh_pedra_neutra(p2)):
+        #Se as pedras corresponderem às pedras do mesmo jogador devolve True
         return True
-    return False
+    return False #Caso contrário devolve False
 
 def pedra_para_str(p):
     '''pedra para str : pedra → str
@@ -179,6 +209,7 @@ def pedra_para_str(p):
     da pedra, isto é, "O", "X" ou "." para pedras do jogador branco, preto ou neutra
     respetivamente.'''
 
+    #Devolve a representação escolhida para a pedra correspondente a "p"
     if eh_pedra_branca(p):
         return "O"
     if eh_pedra_preta(p):
@@ -192,8 +223,9 @@ def eh_pedra_jogador(p):
     contrário.'''
 
     if eh_pedra_preta(p) or eh_pedra_branca(p):
+    #Se a pedra corresponder à de algum jogador, devolve True
         return True
-    return False
+    return False #Caso contrário devolve False
 
 
 #TAD GOBAN
@@ -204,8 +236,9 @@ def cria_goban_vazio(n):
     Também verifica a validade dos argumentos dados'''
 
     if n is None or not (type(n) == int and n in (9, 13, 19)):
-        raise ValueError("cria_goban_vazio: argumento invalido")
-    return {"n": n, "B": (), "P": ()}
+        #Verifica a validade de "n" (é inteiro e é 9, 13 ou 19)
+        raise ValueError("cria_goban_vazio: argumento invalido") #Se não for dá erro
+    return {"n": n, "B": (), "P": ()} #Se for cria um goban sem pedras de jogador
 
 def cria_goban(n, B, P):
     '''cria goban: int x tuplo x tuplo → goban
@@ -214,36 +247,35 @@ def cria_goban(n, B, P):
     por pedras pretas. Também verifica se os argumentos dados são válidos'''
 
     if not (type(B) == tuple and type(P) == tuple):
+        #Verifica se B e P são tuplos
         raise ValueError("cria_goban: argumentos invalidos")
     geral = []
     for inter in B:
-        if inter is None or not (len(inter) == 2 and "col" in inter  and "lin" in inter \
+        if inter is None or not (isinstance(inter, dict) and len(inter) == 2 and "col" in inter  and "lin" in inter \
                 and type(obtem_col(inter)) == str and len(obtem_col(inter)) == 1 \
                 and type(obtem_lin(inter)) == int and chr(65) <= obtem_col(inter) <= chr(64+n) \
                 and 0 < obtem_lin(inter) <= n) or inter in geral:
-            raise ValueError("cria_goban: argumentos invalidos")
+            #Verifica se cada elemento de B é interseção (consultar eh_interseção) e se há interseções repetidas em B
+            raise ValueError("cria_goban: argumentos invalidos") #Se não levanta erro
         else:
             geral += [inter,]
     for inter in P:
-        if inter is None or not (len(inter) == 2 and "col" in inter and "lin" in inter \
+        if inter is None or not (isinstance(inter, dict) and len(inter) == 2 and "col" in inter and "lin" in inter \
                 and type(obtem_col(inter)) == str and len(obtem_col(inter)) == 1 \
                 and type(obtem_lin(inter)) == int and chr(65) <= obtem_col(inter) <= chr(64+n) \
                 and 0 < obtem_lin(inter) <= n) or inter in geral:
-            raise ValueError("cria_goban: argumentos invalidos")
+            #Verifica se cada elemento de P é interseção (consultar eh_interseção) e se há interseções repetidas em P e B
+            raise ValueError("cria_goban: argumentos invalidos") #Se não levanta erro
         else:
             geral += [inter,]
     try:
+        #Verifica se é possível criar um goban e adicionar as interseções ao goban
         goban_vazio = cria_goban_vazio(n)
         goban_vazio.update({"B": B, "P": P})
-
-    except ValueError:
-        raise ValueError("cria_goban: argumentos invalidos")
-    except AttributeError:
-        raise ValueError("cria_goban: argumentos invalidos")
-    except TypeError:
-        raise ValueError("cria_goban: argumentos invalidos")
+    except ValueError or AttributeError or TypeError:
+        raise ValueError("cria_goban: argumentos invalidos") #Se não levanta erro
     
-    return goban_vazio
+    return goban_vazio #Devolve o goban com as interseções em B e P
 
 def cria_copia_goban(gob):
     '''cria copia goban: goban → goban
@@ -278,7 +310,7 @@ def obtem_pedra(gob, inter):
     return "N"
 
 def obtem_cadeia(gob, inter):
-    '''obtem cadeia: goban x intersecao 7→ tuplo
+    '''obtem cadeia: goban x intersecao → tuplo
     obtem cadeia(g, i) devolve o tuplo formado pelas interseções (em ordem de
     leitura) das pedras da cadeia que passa pela interseção i. Se a posição não
     estiver ocupada, devolve a cadeia de posições livres.'''
@@ -350,10 +382,10 @@ def eh_goban(gob):
     '''eh goban: universal → booleano
     eh goban(arg) devolve True caso o seu argumento seja um TAD goban e False
     caso contrário.'''
-    try:
-        if not (type(gob) == dict and len(gob) == 3 and "n", "B", "P" in gob\
+    if not (type(gob) == dict and len(gob) == 3 and "n", "B", "P" in gob\
                 and gob["n"] in (9, 13, 19)):
             return False
+    try:
         for inter in gob["B"]:
             if not eh_intersecao_valida(gob, inter):
                 return False
@@ -425,7 +457,7 @@ def goban_para_str(gob):
     return " " + string + mid + "\n " + string
 
 def obtem_territorios(gob):
-    '''obtem territorios: goban 7→ tuplo
+    '''obtem territorios: goban → tuplo
     obtem territorios(g) devolve o tuplo formado pelos tuplos com as interseções de
     cada território de g. A função devolve as interseções de cada território ordenadas
     em ordem de leitura do tabuleiro de Go, e os territórios ordenados em ordem de
@@ -556,11 +588,10 @@ def turno_jogador(gob, p, copgob):
             arg = str(input("Escreva uma intersecao ou 'P' para passar [O]:"))
         else:
             arg = str(input("Escreva uma intersecao ou 'P' para passar [X]:"))
-    try:
-        gob = jogada(gob, str_para_intersecao(arg), p)
-        return True
-    except ValueError:
-        turno_jogador(gob, p, copgob)
+
+    gob = jogada(gob, str_para_intersecao(arg), p)
+    return True
+   
     
 
 def go(n, ib, ip):
