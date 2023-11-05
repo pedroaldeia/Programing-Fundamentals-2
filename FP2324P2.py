@@ -3,8 +3,9 @@
 
 def cria_intersecao(col, lin):
     '''cria intersecao: str x int → intersecao
-    cria intersecao(col,lin) recebe um caracter e um inteiro correspondentes à
-    coluna col e `a linha lin e devolve a interseção correspondente.'''
+    cria intersecao(col,lin) recebe um caracter e um inteiro que correspondem à
+    coluna e à linha de uma interseção e devolve a interseção com esses parâmetros.'''
+
     try:
         #Verifica se "lin" pode ser tornado em string e em número inteiro
         #Verifica se "col" pode ser tornado numa string
@@ -15,8 +16,9 @@ def cria_intersecao(col, lin):
     
     if type(col) != str or len(col) != 1 or (not (64 < ord(col) < 84))\
          or type(lin) != int or (not (0 < int(lin) < 20)):
-            #Verifica se "col" é argumento válido (é str e é uma letra maiúscula do abecedário)
-            #Verifica se "int" é argumento válido (é número inteiro e entre 1 e 20)
+        #Verifica se "col" é argumento válido (é str e é uma letra maiúscula do alfabeto,
+        #até ao S)
+        #Verifica se "int" é argumento válido (é número inteiro e entre 1 e 20)
             raise ValueError("cria_intersecao: argumentos invalidos")
     
     return {"col": col, "lin": lin}
@@ -24,35 +26,36 @@ def cria_intersecao(col, lin):
 
 def obtem_col(inter):
     '''obtem col: intersecao → str
-    obtem col(i) devolve a coluna col da interseção i'''
+    obtem col(i) devolve a coluna da interseção dada (i)'''
     
     return inter["col"] #Devolve o correspondente a "col" na interseção dada
 
 def obtem_lin(inter):
     '''obtem lin: intersecao → int
-    obtem lin(i) devolve a linha lin da interseção i.'''
+    obtem lin(i) devolve a linha da interseção dada (i).'''
 
     return inter["lin"] #Devolve o correspondente a "lin" na interseção dada
 
 def eh_intersecao(dic):
     '''eh intersecao: universal → booleano
-    eh intersecao(arg) devolve True caso o seu argumento seja um TAD intersecao
-    e False caso contrário.'''
+    eh intersecao(arg) devolve True se arg for um TAD interseção e False caso contrário.'''
 
     if type(dic) != dict or len(dic) != 2 or not("col", "lis" in dic)\
-        or type(obtem_col(dic)) != str or len(obtem_col(dic)) != 1 or not (64 < ord(obtem_col(dic)) < 85)\
+        or type(obtem_col(dic)) != str or len(obtem_col(dic)) != 1 or \
+            not (64 < ord(obtem_col(dic)) < 85)\
             or type(obtem_lin(dic)) != int or  not (0 < obtem_lin(dic) < 20):
         #Verifica se o argumento dado é dicionário pelos seguintes parâmetros:
-        #-"dic" é dicionário de len 2 e contém as keys "col" e "lis"
-        #-Tanto "col" como "lin" são argumentos válidos que correspondem a uma string de len 1 que representa
-        #uma letra do abecedário maiúscula e a um número inteiro entre 1 e 20, respetivamente
+        #-> "dic" é dicionário de len 2 e contém as keys "col" e "lis"
+        #-> Tanto "col" como "lin" são argumentos válidos que correspondem a uma string de len 1 
+        #que representa uma letra do alfabeto até ao S maiúscula e a um número inteiro entre 1  
+        #e 20, respetivamente
         return False #Se não for devolve "False"
     return True #Se for devolve "True"
 
 def intersecoes_iguais(dic1, dic2):
     '''intersecoes iguais: universal x universal → booleano
-    intersecoes iguais(i1, i2) devolve True apenas se i1 e i2 são interseções e são
-    iguais, e False caso contrário.'''
+    intersecoes iguais(i1, i2) devolve True apenas se os argumentos dados forem
+    interseções iguais, e False caso contrário.'''
 
     if obtem_col(dic1) == obtem_col(dic2) and obtem_lin(dic1) == obtem_lin(dic2):
         #Se tanto as colunas como as linhas das duas interseções forem iguais
@@ -61,9 +64,8 @@ def intersecoes_iguais(dic1, dic2):
     return False
 
 def intersecao_para_str(inter):
-    '''intersecao para str : intersecao → str
-    intersecao para str(i) devolve a cadeia de caracteres que representa o seu
-    argumento.'''
+    '''intersecao para str: intersecao → str
+    intersecao para str(i) devolve a string que representa a interseção dada (i).'''
 
     #Devolve uma string constituída pela coluna e pela linha da interseção dada
     return str(obtem_col(inter)) + str(obtem_lin(inter))
@@ -84,8 +86,8 @@ def str_para_intersecao(inter_string):
 def obtem_intersecoes_adjacentes(inter, canto):
     '''obtem intersecoes adjacentes: intersecao x intersecao → tuplo
     obtem intersecoes adjacentes(i, l) devolve um tuplo com as interseções adjacentes
-    à interseção i de acordo com a ordem de leitura em que l corresponde à interseção
-    superior direita do tabuleiro de Go.'''
+    à interseção dada (i) de acordo com a ordem de leitura, sendo que l é a 
+    interseção superior direita do tabuleiro.'''
 
     intersecoes = ()
     if obtem_lin(inter) != 1:
@@ -112,8 +114,8 @@ def obtem_intersecoes_adjacentes(inter, canto):
 
 def ordena_intersecoes(tup):
     '''ordena intersecoes: tuplo → tuplo
-    ordena intersecoes(t) devolve um tuplo de interseções com as mesmas interseções
-    de t ordenadas de acordo com a ordem de leitura do tabuleiro de Go.'''
+    ordena intersecoes(t) devolve um tuplo com as interseções de t ordenadas de acordo com a 
+    ordem de leitura do tabuleiro.'''
 
     a = 0
     lis = list(tup) #Torna o tuplo numa lista
@@ -138,13 +140,13 @@ def ordena_intersecoes(tup):
 
 def cria_pedra_branca():
     '''cria pedra branca: {} → pedra
-    cria pedra branca() devolve uma pedra pertencente ao jogador branco.'''
+    cria pedra branca() devolve uma pedra para o jogador com pedras brancas.'''
 
     return "B" #Devolve a representação escolhida de uma pedra branca, "B"
 
 def cria_pedra_preta():
     '''cria pedra preta: {} → pedra
-    cria pedra preta() devolve uma pedra pertencente ao jogador preto.'''
+    cria pedra preta() devolve uma pedra para o jogador com pedras pretas.'''
 
     return "P" #Devolve a representação escolhida de uma pedra preta, "P"
 
@@ -156,7 +158,7 @@ def cria_pedra_neutra():
 
 def eh_pedra(p):
     '''eh pedra: universal → booleano
-    eh pedra(arg) devolve True caso o seu argumento seja um TAD pedra e False
+    eh pedra(arg) devolve True se o argumento dado (agr) for um TAD pedra e False
     caso contrário.'''
 
     if type(p) == str and p in ("B", "P", "N"):
@@ -166,7 +168,7 @@ def eh_pedra(p):
 
 def eh_pedra_branca(p):
     '''eh pedra branca: pedra → booleano
-    eh pedra branca(p) devolve True caso a pedra p seja do jogador branco e False
+    eh pedra branca(p) devolve True caso a pedra dada for pedra branca e False
     caso contrário'''
 
     if type(p) == str and p == "B":
@@ -176,7 +178,7 @@ def eh_pedra_branca(p):
 
 def eh_pedra_preta(p):
     '''eh pedra: universal → booleano
-    eh pedra preta(p) devolve True caso a pedra p seja do jogador preto e False
+    eh pedra preta(p) devolve True caso a pedra dada for pedra preta e False
     caso contrário.'''
 
     if type(p) == str and p == "P":
@@ -184,9 +186,10 @@ def eh_pedra_preta(p):
         return True
     return False #Caso contrário devolve False
     
-def eh_pedra_neutra(p):
-    '''pedras iguais: universal x universal → booleano
-    pedras iguais(p1, p2) devolve True apenas se p1 e p2 são pedras e são iguais.'''
+def eh_pedra_neutra(p): #Função auxiliar!!!
+    '''eh pedra neutra: universal → booleano
+    eh pedra neutra(p) devolve True caso a pedra dada for pedra neutra e False
+    caso contrário.'''
 
     if type(p) == str and p == "N":
     #Se "p" corresponder à representação da pedra neutra devolve True
@@ -195,19 +198,18 @@ def eh_pedra_neutra(p):
     
 def pedras_iguais(p1, p2):
     '''pedras iguais: universal x universal → booleano
-    pedras iguais(p1, p2) devolve True apenas se p1 e p2 são pedras e são iguais.'''
+    pedras iguais(p1, p2) devolve True se as pedras dadas (p1 e p2) forem da 
+    mesma cor.'''
 
-    if (eh_pedra_branca(p1) and eh_pedra_branca(p2)) or (eh_pedra_preta(p1) and eh_pedra_preta(p2))\
-        or (eh_pedra_neutra(p1) and eh_pedra_neutra(p2)):
+    if (eh_pedra_branca(p1) and eh_pedra_branca(p2)) or (eh_pedra_preta(p1) \
+        and eh_pedra_preta(p2)) or (eh_pedra_neutra(p1) and eh_pedra_neutra(p2)):
         #Se as pedras corresponderem às pedras do mesmo jogador devolve True
         return True
     return False #Caso contrário devolve False
 
 def pedra_para_str(p):
     '''pedra para str : pedra → str
-    pedra para str(p) devolve a cadeia de caracteres que representa o jogador dono
-    da pedra, isto é, "O", "X" ou "." para pedras do jogador branco, preto ou neutra
-    respetivamente.'''
+    pedra para str(p) devolve a string que representa a pedra correspondente.'''
 
     #Devolve a representação escolhida para a pedra correspondente a "p"
     if eh_pedra_branca(p):
@@ -219,8 +221,7 @@ def pedra_para_str(p):
     
 def eh_pedra_jogador(p):
     '''eh pedra jogador : pedra → booleano
-    eh pedra jogador(p) devolve True caso a pedra p seja de um jogador e False caso
-    contrário.'''
+    eh pedra jogador(p) devolve True se a pedra dada (p) for de um jogador.'''
 
     if eh_pedra_preta(p) or eh_pedra_branca(p):
     #Se a pedra corresponder à de algum jogador, devolve True
@@ -232,8 +233,8 @@ def eh_pedra_jogador(p):
 
 def cria_goban_vazio(n):
     '''cria goban vazio: int → goban
-    cria goban vazio(n) devolve um goban de tamanho nxn, sem interseções ocupadas.
-    Também verifica a validade dos argumentos dados'''
+    cria goban vazio(n) devolve um tabuleiro goban de tamanho n por n, sem 
+    pedras de jogadores. Também verifica a validade dos argumentos dados.'''
 
     if n is None or not (type(n) == int and n in (9, 13, 19)):
         #Verifica a validade de "n" (é inteiro e é 9, 13 ou 19)
@@ -242,7 +243,7 @@ def cria_goban_vazio(n):
 
 def cria_goban(n, B, P):
     '''cria goban: int x tuplo x tuplo → goban
-    cria goban(n, ib, ip) devolve um goban de tamanho n x n, com as interseções
+    cria goban(n, ib, ip) devolve um goban de tamanho n por n, com as interseções
     do tuplo ib ocupadas por pedras brancas e as interseções do tuplo ip ocupadas
     por pedras pretas. Também verifica se os argumentos dados são válidos'''
 
@@ -279,7 +280,7 @@ def cria_goban(n, B, P):
 
 def cria_copia_goban(gob):
     '''cria copia goban: goban → goban
-    cria copia goban(t) recebe um goban e devolve uma cópia do goban.'''
+    cria copia goban(t) recebe um goban e devolve uma cópia do mesmo.'''
 
     copia = {}
     if isinstance(gob, dict):
@@ -299,15 +300,14 @@ def cria_copia_goban(gob):
 
 def obtem_ultima_intersecao(gob):
     '''obtem ultima intersecao: goban → intersecao
-    obtem ultima intersecao(g) devolve a interseção que corresponde ao 
-    canto superior direito do goban g.'''
+    obtem ultima intersecao(g) devolve a interseção correspondente ao canto superior 
+    direito do goban.'''
 
     return {"col": chr(gob["n"]+64), "lin": gob["n"]}
 
 def obtem_pedra(gob, inter):
     '''obtem pedra: goban x intersecao → pedra
-    obtem pedra(g, i) devolve a pedra na interseção i do goban g. Se a posição
-    não estiver ocupada, devolve uma pedra neutra'''
+    obtem pedra(g, i) devolve a pedra que se encontra na interseção dada.'''
 
     if inter in gob["B"]: 
     #Se a interseção estiver nas interceções com pedras brancas, devolve uma pedra branca
@@ -320,9 +320,8 @@ def obtem_pedra(gob, inter):
 
 def obtem_cadeia(gob, inter):
     '''obtem cadeia: goban x intersecao → tuplo
-    obtem cadeia(g, i) devolve o tuplo formado pelas interseções (em ordem de
-    leitura) das pedras da cadeia que passa pela interseção i. Se a posição não
-    estiver ocupada, devolve a cadeia de posições livres.'''
+    obtem cadeia(g, i) devolve o tuplo ordenado de interseções que pertencem à
+    cadeia na qual a interseção dada se encontra.'''
 
     cadeia = [inter,] 
     for dic in cadeia:
@@ -339,8 +338,8 @@ def obtem_cadeia(gob, inter):
 
 def coloca_pedra(gob, inter, p):
     '''coloca pedra: goban x intersecao x pedra → goban
-    coloca pedra(g, i, p) modifica destrutivamente o goban g colocando a pedra
-    do jogador p na interseção i, e devolve o próprio goban.'''
+    coloca pedra(g, i, p) altera o goban dado colocando uma pedra do jogador
+    ao qual pertence a jogada na interseção dada.'''
 
     if eh_pedra_jogador(p): 
     #Conforme o tipo de pedra, adiciona a interseção ao tuplo do jogador e
@@ -357,12 +356,13 @@ def coloca_pedra(gob, inter, p):
 
 def remove_pedra(gob, inter):
     '''remove pedra: goban x intersecao → goban
-    remove pedra(g, i) modifica destrutivamente o goban g removendo a pedra
-    da interseção i, e devolve o próprio goban.'''
+    remove pedra(g, i) altera o goban dado, removendo a pedra que se encontra na
+    interseção dada.'''
 
     pedra = obtem_pedra(gob, inter)  
     new_B = tuple(i for i in gob[pedra] if i != inter) 
-    #Retira a interseção do tuplo correspondente às interseções ocupadas pelas pedras do jogador
+    #Retira a interseção do tuplo correspondente às interseções ocupadas pelas 
+    #pedras do jogador
     gob.update({pedra: new_B})
     return gob #Devolve o tabuleiro atualizado
 
@@ -379,7 +379,7 @@ def remove_cadeia(gob, cadeia):
 
 def eh_goban(gob):
     '''eh goban: universal → booleano
-    eh goban(arg) devolve True caso o seu argumento seja um TAD goban e False
+    eh goban(arg) devolve True se o argumento dado for um TAD goban e False
     caso contrário.'''
 
     if not (type(gob) == dict and len(gob) == 3 and "n", "B", "P" in gob\
@@ -413,7 +413,7 @@ def eh_intersecao_valida(gob, inter):
 
 def gobans_iguais(gob1, gob2):
     '''gobans iguais: universal x universal → booleano
-    gobans iguais(g1, g2) devolve True apenas se g1 e g2 forem gobans e forem iguais.'''
+    gobans iguais(g1, g2) devolve True apenas se g1 e g2 forem gobans iguais.'''
 
     if gob1["n"] == gob2["n"]:
     #Se o tamanho do tabuleiro for igual e se o conjunto de interseções ordenadas de ambos
@@ -424,7 +424,7 @@ def gobans_iguais(gob1, gob2):
         
 def goban_para_str(gob):
     '''goban para str : goban → str
-    goban para str(g) devolve a cadeia de caracteres que representa o goban.'''
+    goban para str(g) devolve a string que representa o goban dado.'''
 
     string = " "
     mid = ""
@@ -466,10 +466,8 @@ def goban_para_str(gob):
 
 def obtem_territorios(gob):
     '''obtem territorios: goban → tuplo
-    obtem territorios(g) devolve o tuplo formado pelos tuplos com as interseções de
-    cada território de g. A função devolve as interseções de cada território ordenadas
-    em ordem de leitura do tabuleiro de Go, e os territórios ordenados em ordem de
-    leitura da primeira interseção do território.'''
+    obtem territorios(g) devolve o tuplo constituído pelos tuplos ordenados com as interseções de
+    cada território de g, sendo que cada tuplo é ordenado conforme a sua primeira interseção.'''
 
     geral = []
     territorios = []
@@ -492,9 +490,9 @@ def obtem_territorios(gob):
 
 def obtem_adjacentes_diferentes(gob, tup):
     '''obtem adjacentes diferentes: goban x tuplo → tuplo
-    obtem adjacentes diferentes(g, t) devolve o tuplo ordenado formado pelas interseções
+    obtem adjacentes diferentes(g, t) devolve o tuplo ordenado constinuído pelas interseções
     adjacentes às interseções do tuplo t correspondente às liberdades de uma cadeia de pedras
-    se for pedra de jogador, se for pedra neutra devolve a fronteira do seu território'''
+    se for pedra de jogador, se for pedra neutra devolve a fronteira do seu território.'''
 
     interes = []
     #Se a pedra for branca ou preta, adiciona a uma lista as interseções adjacentes à cadeia 
@@ -523,14 +521,15 @@ def obtem_adjacentes_diferentes(gob, tup):
 
 def jogada(gob, inter, p):
     '''jogada: goban x intersecao x pedra → goban
-    jogada(g, i, p) modifica destrutivamente o goban g colocando a pedra de jogador
-    p na interseção i e remove todas as pedras do jogador contrário pertencentes a
-    cadeias adjacentes à i sem liberdades, devolvendo o próprio goban'''
+    jogada(g, i, p) altera o goban dado colocando a pedra do jogador na interseção dada e 
+    remove todas as pedras do jogador contrário pertencentes a cadeias adjacentes à interseção
+    dada caso não tenham liberdades, devolvendo o próprio goban.'''
 
     if not eh_pedra_branca(obtem_pedra(gob, inter)) and \
         not eh_pedra_preta(obtem_pedra(gob, inter)):
         coloca_pedra(gob, inter, p)
-        #Se a interseção dada não estiver ocupada, é colocada uma pedra do jogador na interseção
+        #Se a interseção dada não estiver ocupada, é colocada uma pedra do jogador na
+        #interseção
     if eh_pedra_branca(p):
         for adj in obtem_intersecoes_adjacentes(inter, obtem_ultima_intersecao(gob)):
             if eh_pedra_preta(obtem_pedra(gob, adj)) and \
@@ -547,18 +546,18 @@ def jogada(gob, inter, p):
 
 def obtem_pedras_jogadores(gob):
     '''obtem pedras jogadores: goban → tuplo
-    obtem pedras jogadores(g) devolve um tuplo de dois inteiros que correspondem ao
-    número de interseções ocupadas por pedras do jogador branco e preto, respetivamente.'''
+    obtem pedras jogadores(g) devolve um tuplo constituído por dois inteiros que correspondem
+    ao número de interseções ocupadas por pedras do jogador branco e preto, respetivamente.'''
 
-    #Devolve um tuplo com a len dos tuplos interseções de cada jogador, correspondente à quantidade
-    #de pedras que eles têm em jogo
+    #Devolve um tuplo com a len dos tuplos interseções de cada jogador, correspondente
+    #à quantidade de pedras que eles têm em jogo
     return (len(gob["B"]), len(gob["P"]))
 
 #Funções adicionais
 
 def calcula_pontos(gob):  #2.2.1
     '''calcula pontos: goban → tuple
-    calcula pontos(g) é uma função auxiliar que recebe um goban e devolve o tuplo de dois
+    calcula pontos(g) recebe um goban e devolve o tuplo constituído por dois
     inteiros com as pontuações dos jogadores branco e preto, respetivamente.'''
 
     count_b = len(gob["B"]) #Adiciona à contagem de cada jogador a quantidade de
@@ -581,9 +580,9 @@ def calcula_pontos(gob):  #2.2.1
 
 def eh_jogada_legal(gob, inter, p, copgob):
     '''eh jogada legal: goban x intersecao x pedra x goban → booleano 
-    eh jogada legal(g, i, p, l) é uma função auxiliar que recebe um goban g, uma interseção
-    i, uma pedra de jogador p e um outro goban l e devolve True se a jogada for legal ou
-    False caso contrário, sem modificar g ou l.'''
+    eh jogada legal(g, i, p, l) recebe um goban (g), uma interseção (i), uma pedra do jogador
+    (p) e outro goban correspondente ao estado de jogo proibido antes da resolução da jogada 
+    e devolve True se a jogada for legal ou False caso contrário, sem modificar g ou l.'''
 
     g_copia = cria_copia_goban(gob)
     if eh_intersecao_valida(gob, inter) and eh_pedra_neutra(obtem_pedra(gob, inter)):
@@ -598,11 +597,11 @@ def eh_jogada_legal(gob, inter, p, copgob):
         
 def turno_jogador(gob, p, copgob):
     '''turno jogador: goban x pedra x goban → booleano
-    turno jogador(g, p, l) é uma função auxiliar que recebe um goban g, uma pedra de
-    jogador p e um outro goban l, e oferece ao jogador que joga com pedras p a opção de
-    passar ou de colocar uma pedra própria numa interseção. Se o jogador passar, a função
-    devolve False sem modificar os argumentos. Caso contrário, a função devolve True e
-    modifica destrutivamente o tabuleiro g de acordo com a jogada realizada.'''
+    turno jogador(g, p, l) recebe um goban (g), uma pedra de
+    jogador (p) e um outro goban que corresponde ao estado de jogo proibido após da resolução
+    da jogada, e que oferece ao jogador respetivo a opção de passar ou de colocar uma pedra 
+    sua numa interseção. Se o jogador passar, a função devolve False sem alterar o tabuleiro.
+    Caso contrário, a função devolve True e altera o goban dado através da jogada atribuída.'''
 
     arg = ""
     while arg == "":
@@ -627,13 +626,12 @@ def turno_jogador(gob, p, copgob):
 
 def go(n, ib, ip):
     '''go: int x tuple x tuple → booleano (1,5 valores)
-    go(n, tb, tn) é a função principal que permite jogar um jogo completo do Go de dois
-    jogadores. A função recebe um inteiro correspondente à dimensão do tabuleiro, e dois
-    tuplos (potencialmente vazios) com a representação externa das interseções ocupadas
-    por pedras brancas (tb) e pretas (tp) inicialmente. O jogo termina quando os dois
-    jogadores passam a vez de jogar consecutivamente. A função devolve True se o jogador
-    com pedras brancas conseguir ganhar o jogo, ou False caso contrário. Verifica a 
-    validade dos seus argumentos'''
+    go(n, tb, tn) é a função que permite jogar um jogo completo de Go. A função recebe
+    um inteiro que corresponde à dimensão do tabuleiro, e dois tuplos (potencialmente 
+    vazios) com strings que representam as interseções ocupadas por pedras brancas (tb)
+    e pretas (tp) inicialmente. O jogo termina quando os dois jogadores passam a vez de
+    jogar consecutivamente. A função devolve True se o jogador com pedras brancas ganhar
+    o jogo, ou False caso contrário. Verifica também a validade dos argumentos dados.'''
 
     passcount = 0
     if not(isinstance(ib, tuple) and isinstance(ip, tuple) and isinstance(n, int) and \
@@ -660,10 +658,10 @@ def go(n, ib, ip):
     b = cria_pedra_preta()
     while passcount < 2: 
         #Enquanto os dois jogadores não tiverem passado a jogada consecutivamente, 
-        #continua a repetir
+        #repete o ciclo
         print ("Branco (O) tem", calcula_pontos(gob)[0], "pontos\nPreto (X) tem", \
                calcula_pontos(gob)[1], "pontos") #Dá print à tabela dos pontos e ao tabuleiro
-        print(goban_para_str(gob))
+        print(goban_para_str(gob))               #onde o jogador preto joga
         a = turno_jogador(gob, b, cria_copia_goban(gob)) #Dá jogada ao jogador
         if not a: #Verifica se o jogador passou a jogada
             passcount += 1
@@ -672,7 +670,7 @@ def go(n, ib, ip):
         if passcount < 2:
             b = cria_pedra_branca()
             print ("Branco (O) tem", calcula_pontos(gob)[0], "pontos\nPreto (X) tem", \
-                   calcula_pontos(gob)[1], "pontos") 
+                   calcula_pontos(gob)[1], "pontos") #Desta vez para o jogador branco
             print(goban_para_str(gob))
             a = turno_jogador(gob, b, cria_copia_goban(gob))
             if not a:
